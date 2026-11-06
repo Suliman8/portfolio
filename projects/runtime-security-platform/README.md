@@ -2,7 +2,7 @@
 
 > Watches what happens *inside* running Kubernetes containers at the Linux-kernel level with eBPF. It detects attacks such as credential theft, reverse shells and persistence, scores them with machine learning, and can kill the malicious process in the kernel before the syscall completes.
 
-**Role:** Solo — designed and built end to end · **Status:** Working end to end on a single-node k3s lab (laptop). Cloud (AWS EKS) deployment not done yet; the ML attack classifier is wired in but trained on a very small dataset. · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** Working end to end on a single-node k3s cluster. Cloud (AWS EKS) deployment not done yet; the ML attack classifier is wired in but trained on a very small dataset. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ---
 
@@ -14,21 +14,21 @@ I wanted a second layer that sits **in the kernel**. It should see every process
 
 ## What I built
 
-A complete Kubernetes-native detection and response pipeline, from kernel hooks to a SOC-style dashboard, plus an attack lab to prove it works:
+A complete Kubernetes-native detection and response pipeline, from kernel hooks to a SOC-style dashboard, plus an attack environment to prove it works:
 
 - **Kernel sensors:** 7 Tetragon TracingPolicies hooked on Linux LSM hooks and `tcp_connect`. They cover sensitive-file reads, suspicious program execution, connections to known reverse-shell and mining-pool ports, persistence writes, log tampering, container-escape attempts and DNS-tunnelling tools.
-- **In-kernel enforcement:** 7 matching *enforce* policies that send `SIGKILL` inside the hook, scoped to the demo namespace.
+- **In-kernel enforcement:** 7 matching *enforce* policies that send `SIGKILL` inside the hook, scoped to the target namespace.
 - **Go event collector:** streams events from Tetragon over gRPC, drops host-level noise, normalises each event to versioned JSON with a trace ID, and publishes it to Kafka keyed by pod. It exposes Prometheus metrics plus health and readiness endpoints.
 - **Python feature and detection service (FastAPI):** consumes Kafka and condenses each pod's activity into **60-second windows of 16 numeric features**. Each window is scored by three layers: hand-written rules, an Isolation Forest anomaly model and an XGBoost attack classifier.
 - **SOC dashboard (React + TypeScript):** live KPI cards, a MITRE ATT&CK kill-chain row (10 tactics), a per-pod attack timeline and an alerts table with MITRE technique IDs.
 - **Operations layer:** Prometheus with 7 alert rules, a Grafana dashboard, and default-deny NetworkPolicies isolating the platform from the workloads it watches.
-- **Attack lab:** a deliberately vulnerable Flask app with a command-injection bug, plus scripts for 7 attack scenarios and a 6-step exploit chain launched from outside the cluster.
+- **Attack environment:** a deliberately vulnerable Flask app with a command-injection bug, plus scripts for 7 attack scenarios and a 6-step exploit chain launched from outside the cluster.
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    ATK["Attacker HTTP request"] --> POD["Vulnerable demo pod"]
+    ATK["Attacker HTTP request"] --> POD["Vulnerable target pod"]
     POD --> KERN["Linux kernel - Tetragon eBPF hooks"]
     KERN -->|"enforce policy match"| KILL["SIGKILL in kernel"]
     KERN -->|"gRPC event stream"| COL["Go collector"]
@@ -58,24 +58,24 @@ Tetragon runs eBPF programs on kernel hooks on every node. When a pod triggers a
 
 ## Results
 
-All results are from my local lab: a single-node k3s cluster on my laptop.
+All results are from a single-node k3s cluster.
 
 | Result | How it was measured |
 |---|---|
 | **31 Python + 5 Go unit tests, all passing** | `pytest` and `go test` on the feature service and the collector's event normaliser |
 | **Command-injection attack that read `/etc/shadow` detected end to end in under 60 seconds** and shown on the dashboard | Live exploit run against the vulnerable app in detect-only mode, before enforcement was switched on; latency is bounded by the 60-second feature window |
-| **Malicious writes killed in the kernel (exit code 137 / SIGKILL)** when writing to `/root/.ssh/authorized_keys` and `/root/.bash_history` | Manual attack runs inside the demo namespace with enforce policies loaded |
-| **14 TracingPolicies running** (7 detect + 7 enforce) | Loaded in Tetragon in the lab cluster |
+| **Malicious writes killed in the kernel (exit code 137 / SIGKILL)** when writing to `/root/.ssh/authorized_keys` and `/root/.bash_history` | Manual attack runs inside the target namespace with enforce policies loaded |
+| **14 TracingPolicies running** (7 detect + 7 enforce) | Loaded in Tetragon in the cluster |
 | **About 60% of raw kernel events dropped as host noise** by the collector before reaching Kafka | Early pipeline testing on my desktop machine |
 | **Isolation Forest flagged an attack window:** anomaly score -0.658 against a -0.55 threshold, raising an "ML Anomaly" alert | First version of the anomaly model, live attack run |
 | **Training data:** 758 benign events (8 windows) and 1,706 attack events | Captured from Kafka under controlled benign-only and attack-only runs |
 
 **Honest limits**
 
-- **Lab-scale, not production.** Everything runs on one k3s node. The cloud (EKS) deployment was planned but deferred for cost reasons. The platform is deployed with plain Kubernetes manifests, and there is no Helm chart yet.
+- **Single-node scale, not production.** Everything runs on one k3s node. The cloud (EKS) deployment was planned but deferred for cost reasons. The platform is deployed with plain Kubernetes manifests, and there is no Helm chart yet.
 - **The XGBoost classifier is data-starved.** It was trained on only 18 labelled windows (8 benign, 4 credential access, 4 C2/reverse shell, 2 other). That proves the wiring, not accuracy, so I haven't claimed an accuracy number. I added class weighting so it doesn't just default to "benign", but it needs far more data per class.
-- **The anomaly baseline is small.** 8 windows of benign traffic from two demo apps is enough to demonstrate the method, not to model "normal" across many services.
-- **Enforcement is rule-driven.** The kill policies are static kernel rules scoped to the demo namespace, not triggered by the ML models.
+- **The anomaly baseline is small.** 8 windows of benign traffic from two test applications is enough to demonstrate the method, not to model "normal" across many services.
+- **Enforcement is rule-driven.** The kill policies are static kernel rules scoped to the target namespace, not triggered by the ML models.
 - **Not yet tested against adaptive attackers** who deliberately blend in with normal behaviour.
 
 ## Tech stack
@@ -113,6 +113,6 @@ Diagrams I made for the project write-up:
 
 ## See it running
 
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

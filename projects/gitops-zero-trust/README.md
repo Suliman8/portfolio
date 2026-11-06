@@ -1,7 +1,7 @@
 # GitOps-Native Zero-Trust Kubernetes
 > A Kubernetes cluster where every workload gets a cryptographic identity, services authenticate each other with mutual TLS, access is granted by identity instead of network location, and the whole security posture lives in Git, where every change is reviewed and any manual drift is reverted automatically.
 
-**Role:** Solo — designed and built end to end · **Status:** In progress. Weeks 1–6 of a 10-week plan are complete and documented, and Week 7 (Vault) is under way. It runs as a lab on a local 3-node kind cluster. · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** In progress. Weeks 1–6 of a 10-week plan are complete and documented, and Week 7 (Vault) is under way. It runs on a local 3-node kind cluster. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -45,12 +45,12 @@ flowchart TD
     GIT --> ARGO["ArgoCD: sync and self-heal"]
     ARGO --> SPS["SPIRE Server and Controller Manager"]
     ARGO --> ISTIOD["Istio control plane"]
-    ARGO --> POL["AuthorizationPolicy: allow demo-app only"]
+    ARGO --> POL["AuthorizationPolicy: allow client only"]
     ARGO --> VAULT["Vault: Week 7, in progress"]
     SPS --> SPA["SPIRE Agent on every node"]
-    SPA -.->|"SVIDs, Weeks 3 to 5"| CLI["demo-app pods with Envoy sidecar"]
+    SPA -.->|"SVIDs, Weeks 3 to 5"| CLI["Client pods with Envoy sidecar"]
     ISTIOD -->|"certs and config via xDS"| CLI
-    ISTIOD -->|"certs and config via xDS"| SRV["demo-server pod with Envoy sidecar"]
+    ISTIOD -->|"certs and config via xDS"| SRV["Server pod with Envoy sidecar"]
     CLI -->|"mutual TLS"| SRV
     POL -.->|"enforced in sidecar"| SRV
     SRV -.->|"K8s auth, fetch secret"| VAULT
@@ -79,7 +79,7 @@ Everything below was measured on my local 3-node kind cluster and recorded in my
 |---|---|
 | ArgoCD self-heal | 4 out-of-band changes (manual scale, image change, deleted Service, deleted Deployment) were all reverted or recreated automatically. The scale and image changes were reverted within about 30 s. A 5th test confirmed that a change made in Git was applied cleanly. |
 | Node attestation | **3 / 3** SPIRE agents attested to the server (one per node) |
-| Identity entries from Git | The controller created **4** SPIRE entries from YAML (one per demo pod plus a node alias). A brand-new test pod received its certificate in about 4 s. |
+| Identity entries from Git | The controller created **4** SPIRE entries from YAML (one per workload pod plus a node alias). A brand-new test pod received its certificate in about 4 s. |
 | SPIFFE mTLS | The client logged continuous `OK` responses carrying the server's verified SPIFFE ID, and the server echoed back the client's verified ID |
 | Identity revocation via Git (Week 5) | Registration entries dropped from 5 to 2 about 10 s after the revoke commit. Restarted pods couldn't get a certificate. The full revoke-and-restore cycle took about 3.5 minutes. |
 | Policy revocation via Git (Week 6) | Client calls flipped from `OK` to `403 RBAC: access denied` about 25 s after the policy edit. After a revert commit, calls returned to `OK` at about the 45-second mark. |
@@ -110,6 +110,6 @@ The comparison showed something real. Identity revocation is limited by how long
 - **One ArgoCD Application per service.** When I revoked the client's access, the server's Application stayed healthy and in sync. Bundling them would have hidden a deliberate change behind a confusing "OutOfSync" warning.
 
 ## See it running
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

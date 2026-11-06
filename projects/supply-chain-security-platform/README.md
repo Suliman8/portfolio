@@ -2,7 +2,7 @@
 
 > A CI/CD pipeline and Kubernetes admission gate that make every container image carry cryptographic proof of who built it, how it was built and what is inside it. Unsigned or tampered images are refused before they can run.
 
-**Role:** Solo — designed and built end to end · **Status:** v1.0 complete. The CI pipeline runs on GitHub-hosted runners; admission control was demonstrated on a local kind cluster, not a production cluster. · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** v1.0 complete. The CI pipeline runs on GitHub-hosted runners; admission control was verified on a local kind cluster, not a production cluster. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ---
 
@@ -14,7 +14,7 @@ The industry answer is the **SLSA framework** combined with **Sigstore** signing
 
 ## What I built
 
-A reference implementation of a SLSA Build Level 3 supply chain, applied to a real 3-tier demo app (TaskFlow: a React frontend, a Node.js/Express API and PostgreSQL). Every push to `main` builds both application images and passes them through the full chain:
+A reference implementation of a SLSA Build Level 3 supply chain, applied to a 3-tier application (TaskFlow: a React frontend, a Node.js/Express API and PostgreSQL). Every push to `main` builds both application images and passes them through the full chain:
 
 - **Build and sign:** GitHub Actions builds each image with Buildx, pushes it to GitHub Container Registry, and signs it with **Sigstore Cosign in keyless mode**. No long-lived signing key exists anywhere.
 - **SLSA L3 provenance:** a separate, isolated job runs the official `slsa-github-generator` (v2.1.0) reusable workflow. It attaches a signed record of exactly how, where and from which commit the image was built.
@@ -23,7 +23,7 @@ A reference implementation of a SLSA Build Level 3 supply chain, applied to a re
 - **Public transparency:** every signature and attestation is recorded in Sigstore's public, append-only **Rekor** log.
 - **Admission control:** a **Kyverno** ClusterPolicy in Enforce mode rejects any pod whose image is not signed by this repository's own GitHub workflow.
 - **Attestation dashboard:** a small Python server and a single-page UI pull live signature, provenance, SBOM and CVE data for each image, with a one-click refresh.
-- **Security documentation:** a threat model covering 9 threats, a requirement-by-requirement SLSA v1.0 mapping, and a scripted live-demo walkthrough.
+- **Security documentation:** a threat model covering 9 threats, a requirement-by-requirement SLSA v1.0 mapping, and a scripted end-to-end walkthrough.
 - **12 helper scripts** to verify, scan, show the SBOM, simulate an attack and test admission. All are idempotent and safe to re-run.
 
 ## Architecture
@@ -75,7 +75,7 @@ Numbers come from the dashboard's live data snapshot (collected 25 April 2026 by
 - **Admission checks the signature, not everything.** Kyverno verifies signature, signer identity, digest and Rekor inclusion. It doesn't yet require the SLSA provenance attestation or check CVE results at admission; provenance is verified with Cosign in the scripts and dashboard.
 - **The policy covers only this project's images.** Third-party images such as a public nginx are outside its scope.
 - **Branch protection on `main` isn't enforced** (solo project), so the "compromised workflow" threat is only partly mitigated.
-- **Lab cluster only.** Admission control ran on a local kind cluster. Multi-arch images, automatic rebuilds on dependency updates, GitOps deployment and a self-hosted Sigstore stack are listed as stretch goals, not done.
+- **Local cluster only.** Admission control ran on a local kind cluster. Multi-arch images, automatic rebuilds on dependency updates, GitOps deployment and a self-hosted Sigstore stack are listed as stretch goals, not done.
 
 ## Tech stack
 
@@ -86,7 +86,7 @@ Numbers come from the dashboard's live data snapshot (collected 25 April 2026 by
 | SBOM and scanning | Syft (SPDX, CycloneDX), Grype |
 | Admission control | Kyverno 1.13 (verifyImages, digest mutation), Kubernetes via kind |
 | Dashboard and tooling | Python 3 HTTP server, HTML/JavaScript, Bash, jq |
-| Demo application | React 18 + Vite served by nginx, Node.js 20 + Express, PostgreSQL 16, Docker Compose |
+| Protected application | React 18 + Vite served by nginx, Node.js 20 + Express, PostgreSQL 16, Docker Compose |
 
 ## Design decisions
 
@@ -98,6 +98,6 @@ Numbers come from the dashboard's live data snapshot (collected 25 April 2026 by
 
 ## See it running
 
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

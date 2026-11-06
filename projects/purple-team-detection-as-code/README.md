@@ -20,7 +20,7 @@ A detection-as-code repository with two CI gates. One proves every rule compiles
 - **Workflow 2, Purple Team**: starts Falco (modern eBPF) on the GitHub runner, runs a scripted attack burst inside a throwaway `ubuntu:22.04` container, then asserts exactly which detections fired and posts a coverage table as a sticky PR comment.
 - **ATT&CK coverage heatmap**: a script that exports a MITRE ATT&CK Navigator layer. Green means the rule exists and CI proves it fires, yellow means the rule exists but is untested, and gray means there is no rule.
 - **Kubernetes cyber range** (kind): an isolated namespace with NetworkPolicies and a ResourceQuota, an OWASP Juice Shop target and a "compromised host" pod. I wired in the third-party adversary-emulation tools MITRE Caldera and Atomic Red Team for manual attack exercises.
-- **One-command local demo**: `./scripts/demo.sh` compiles the rules, runs the live attack-and-detect check and exports the heatmap.
+- **One-command local run**: `./scripts/demo.sh` compiles the rules, runs the live attack-and-detect check and exports the heatmap.
 
 ## Architecture
 

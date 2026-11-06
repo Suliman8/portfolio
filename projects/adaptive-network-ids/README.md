@@ -1,7 +1,7 @@
 # Adaptive Network Intrusion Detection System with Human-in-the-Loop Retraining
 > A full-stack network IDS that sniffs live traffic, runs every packet through layered detectors (payload signatures, flood and scan heuristics, an XGBoost classifier, anomaly triage), and lets an analyst label unknown threats to retrain the model, with versioning and rollback.
 
-**Role:** Final-year thesis, B.S. Computer Science, FAST-NUCES (advisor: Ali Sayyed) · **Status:** Built in 2025 as my final-year project, with detection tuning continued into 2026. It's a research prototype that runs on one laptop and was tested on live Wi-Fi, not a production deployment. A paper describing it is in preparation (planned as an arXiv preprint). · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Final-year thesis, B.S. Computer Science, FAST-NUCES (advisor: Ali Sayyed) · **Status:** Built in 2025 as my final-year project, with detection tuning continued into 2026. It's a research prototype that runs on one laptop and was tested on live Wi-Fi, not a production deployment. A paper describing it is in preparation (planned as an arXiv preprint). · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -136,17 +136,17 @@ The figures come from the paper in preparation and were regenerated from the sav
 
 ## Honest limits
 
-- **The ML numbers are benchmark-only** (UNSW-NB15, a 2015 lab dataset), computed per flow record on a custom re-split (see "How to read these numbers").
+- **The ML numbers are benchmark-only** (UNSW-NB15, a 2015 benchmark dataset), computed per flow record on a custom re-split (see "How to read these numbers").
 - **Possible dataset shortcut.** Source TTL alone accounts for 35% of the model's feature importance. TTL is a known artefact of the UNSW-NB15 testbed, so the benchmark score may overstate how well the model would transfer to another network.
 - **Binary output only.** The model says Normal or Attack. It doesn't tell apart the 9 attack categories in the dataset.
 - **The anomaly layer is a triage filter, not a validated zero-day detector.** It's fitted on synthetic normal traffic, its confidence levels are hand-set rather than calibrated, and it hasn't been benchmarked on held-out attacks.
 - **The retraining loop is built but hasn't run a full cycle.** In the recorded deployment the queue held 3 labelled samples against a 100-label trigger, so no retrained model was produced and the accuracy benefit of retraining is unmeasured.
 - **Plaintext only.** TLS traffic is skipped by design, so attacks over HTTPS are invisible to the payload inspector.
 - **No adversarial testing.** The attack scripts reproduce standard tool-driven attacks. Nothing was designed to evade this detector (fragmentation, low-and-slow, payload mutation).
-- **Lab scale.** One laptop, one Wi-Fi network, one attacking phone. In the build used for the live test, the UDP and ICMP flood detectors couldn't actually fire (their thresholds exceeded their sampling window). That's why the live results show no UDP/ICMP alerts. I re-tuned them later.
+- **Small scale.** One laptop, one Wi-Fi network, one attacking phone. In the build used for the live test, the UDP and ICMP flood detectors couldn't actually fire (their thresholds exceeded their sampling window). That's why the live results show no UDP/ICMP alerts. I re-tuned them later.
 - **The sixth layer was never built.** The thesis was proposed as "A Six-Layer Adaptive IDS with MITRE ATT&CK Mapping". The planned sixth layer, which would tag each alert with ATT&CK tactics and techniques, wasn't implemented. The paper draft describes five layers and lists ATT&CK mapping as future work.
 
 ## See it running
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

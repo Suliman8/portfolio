@@ -1,7 +1,7 @@
 # LLM Application Security Gateway (AI Firewall)
 > A FastAPI security proxy that sits between users and large language models and stops prompt injection, jailbreaks, system-prompt extraction and secret leaks, on the way in and on the way out.
 
-**Role:** Solo — designed and built end to end · **Status:** v1.0.0 finished (May 2026). It's a lab project that runs locally and hasn't been deployed to production. · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** v1.0.0 released (May 2026). Runs locally; not yet deployed to production. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -61,7 +61,7 @@ A request is checked for a valid API key and a free rate-limit token. Then the d
 - **Indirect-injection scanning.** Works on PDFs, URLs and raw text. It blocks URLs that resolve to private, loopback or link-local addresses, caps size, page count and fetch time, and tags each result with where the content came from.
 - **Graceful degradation.** No Groq key: L2 turns off and the other layers keep working. Redis down: the in-memory limiter takes over. Ollama down: a clean 503. A health endpoint reports which layers are loaded.
 - **Per-layer transparency.** Every response includes each layer's score and verdict, so you can see why a request was blocked or allowed.
-- **Developer experience.** OpenAPI docs, a small browser demo page, and start/stop scripts that bring up Redis, Ollama and the gateway.
+- **Developer experience.** OpenAPI docs, a small browser test page, and start/stop scripts that bring up Redis, Ollama and the gateway.
 
 ## Results
 
@@ -133,6 +133,6 @@ Charts were generated automatically from the benchmark run.
 - No CI pipeline yet
 
 ## See it running
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

@@ -2,7 +2,7 @@
 
 > An offensive AI-security tool that fires a library of prompt-injection and jailbreak attacks at a language model, decides which ones broke its rules, rates each finding by OWASP LLM Top-10 category and severity, and writes an HTML + JSON report.
 
-**Role:** Solo — designed and built end to end · **Status:** Working learning project (October 2026). The CLI, web UI, reports and tests all run locally against models I host myself with Ollama. Agentic (tool-abuse) attacks exist only as an early prototype, and a comparison with garak and CI are still on the roadmap. · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** Complete (October 2026). The CLI, web UI, reports and tests all run locally against models I host myself with Ollama. Agentic (tool-abuse) attacks exist only as an early prototype, and a comparison with garak and CI are still on the roadmap. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -137,6 +137,6 @@ The web UI's scan form: pick a local model, optionally turn on the LLM-as-judge,
 
 ## See it running
 
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>

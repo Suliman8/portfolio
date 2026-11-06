@@ -2,7 +2,7 @@
 
 > A self-hosted service that scores every website visitor from 0 to 100, separates humans from bots and from cryptographically verified AI agents, and lets the site owner choose whether agents are blocked or welcomed under rate limits.
 
-**Role:** Solo — designed and built end to end · **Status:** Working personal learning project — the full stack starts locally with one `docker compose up`; not production-hardened · **Source code:** private (walkthrough or live demo available on request)
+**Role:** Solo — designed and built end to end · **Status:** Complete. The full stack starts with one `docker compose up`; not yet production-hardened · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -12,10 +12,10 @@ The obvious clue, the `User-Agent` header, is written by the visitor and can say
 
 ## What I built
 
-AgentGuard is a guard service that sits in front of a demo shop. A small script on the page reports raw browser facts. The server combines those facts with request headers, request speed and, for AI agents, a cryptographic signature. It turns them into a score and a verdict, and the owner's policy decides whether the request gets **200 OK**, **429 Too Many Requests** or **403 Forbidden**.
+AgentGuard is a guard service that sits in front of a test storefront. A small script on the page reports raw browser facts. The server combines those facts with request headers, request speed and, for AI agents, a cryptographic signature. It turns them into a score and a verdict, and the owner's policy decides whether the request gets **200 OK**, **429 Too Many Requests** or **403 Forbidden**.
 
 - **Guard API** (Python, FastAPI): the scoring engine, a Web Bot Auth signature verifier, a policy engine, a protected shop endpoint, and event, stats and WebSocket endpoints.
-- **Demo shop page**: a "witness" script that reports facts such as whether the browser is automated and whether real human input happened. It never scores itself.
+- **Storefront page**: a "witness" script that reports facts such as whether the browser is automated and whether real human input happened. It never scores itself.
 - **Live dashboard** (React, TypeScript, Vite): visitor counters, a live event table showing which clues caught each visitor, and the owner's Mode A / Mode B switch.
 - **Storage**: Redis for short-lived state (speed counters, used signature nonces, latest page report) and PostgreSQL for a permanent event log and the owner's chosen mode.
 - **Red-team bots**: 9 bots of my own, 8 attackers and 1 honest signed agent. I used them to test the detector and fix what they got past.
@@ -25,7 +25,7 @@ AgentGuard is a guard service that sits in front of a demo shop. A small script 
 
 ```mermaid
 flowchart LR
-    V["Visitor: human, bot or AI agent"] --> PAGE["Demo shop page with witness script"]
+    V["Visitor: human, bot or AI agent"] --> PAGE["Storefront page with witness script"]
     PAGE -->|raw browser facts| API["Guard API - FastAPI"]
     V -->|shop request, headers, optional signature| API
     API --> WBA["Web Bot Auth verifier - RFC 9421, Ed25519"]
@@ -77,7 +77,7 @@ Anyone can read the current mode, but changing it requires an admin key.
 
 ## Results
 
-All numbers below come from the project's test suite and my recorded experiments. The detector has only run against my own demo shop with my own bots.
+All numbers below come from the project's test suite and my recorded experiments. The detector has only run against my own test storefront with my own bots.
 
 - **29 automated tests, all passing** (pytest): 11 for scoring, 6 for policy and 12 for Web Bot Auth.
 - **Checked against the IETF draft's official test vectors.** The verifier accepts both signed examples published in the Web Bot Auth draft (Appendix E.2.1 and E.2.2) and reproduces the draft's key ID (JWK thumbprint). It rejects the same examples when they are sent to another site, have the signer changed, or have expired. A separate conformance script passes **7 of 7** checks.
@@ -117,11 +117,11 @@ The same honest agent, with the same valid signature, was blocked in Mode A and 
 
 ## Screenshots
 
-Early version of the demo page, captured by my own headless bots. The page lists each clue and its points, and the server returns the score.
+Early version of the storefront page, captured by my own headless bots. The page lists each clue and its points, and the server returns the score.
 
 | Simple bot caught by the automation flag | Ninja bot caught despite hiding the flag |
 |---|---|
-| ![Demo page scoring a headless browser bot at 100](images/demo-simple-bot-caught.png) | ![Demo page scoring a stealthier bot at 90 from missing human input and a missing language header](images/demo-ninja-bot-caught.png) |
+| ![Storefront page scoring a headless browser bot at 100](images/simple-bot-caught.png) | ![Storefront page scoring a stealthier bot at 90 from missing human input and a missing language header](images/stealth-bot-caught.png) |
 
 ## Design decisions
 
@@ -133,6 +133,6 @@ Early version of the demo page, captured by my own headless bots. The page lists
 
 ## See it running
 
-Source code is private to protect the work. I'm happy to walk through the code or give a live demo in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
+Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
 
 <sub>© 2026 Suliman Khan. All rights reserved.</sub>
