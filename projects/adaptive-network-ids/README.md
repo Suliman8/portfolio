@@ -1,7 +1,7 @@
 # Adaptive Network Intrusion Detection System
 > A full-stack network IDS that inspects live traffic with layered detectors (payload signatures, stateful attack heuristics and machine learning), explains each alert to an analyst, and was extended in 2026 with a self-built dataset and a live flow-based ML detector.
 
-**Role:** Final-year project (team of 3), B.S. Computer Science, FAST-NUCES, completed in 2025; extended independently in 2026 · **Status:** Working research prototype on a single host with live Wi-Fi capture, not a production deployment. A paper is in preparation. · **Source code:** private (code walkthrough or live demonstration available on request)
+**Role:** Final-year project, B.S. Computer Science, FAST-NUCES, completed in 2025; extended independently in 2026 · **Status:** Working research prototype on a single host with live Wi-Fi capture, not a production deployment. A paper is in preparation. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -22,7 +22,7 @@ The thesis proposed a **six-layer adaptive architecture**. A Python/FastAPI back
 - **XGBoost classifier.** A binary Normal-vs-Attack model trained on UNSW-NB15 (68 features), used as a high-confidence second opinion (alerts only above 0.999 confidence).
 - **Unknown-threat triage.** Rule-based checks (oversized DNS and ICMP, DNS over TCP, large payloads on unusual ports and others) send suspicious traffic to an analyst review queue with human-readable reasons.
 - **Analyst review workflow.** A review page shows why each alert fired; analysts label threats or mark false positives, and similar threats are labelled in one batch.
-- **Planned layers.** MITRE ATT&CK mapping is planned. Automated retraining from analyst labels, with model versioning and rollback, is implemented in code but has not yet completed a full cycle.
+- **Adaptive retraining.** Automated retraining from analyst labels, with model versioning and rollback, is implemented in code but has not yet completed a full cycle.
 - **Attack-simulation suite.** 29 attack generators with a launcher menu (floods, scans, brute force, SQL injection, XSS, backdoor probes), run from a phone on the same Wi-Fi so live tests are repeatable.
 
 ## 2026 extension: from benchmark to real networks
@@ -122,7 +122,7 @@ Packet-level checks run in order of cost and precision, and the first match wins
 - **The flow detector still needs tuning on real home traffic.** It is accurate on held-out lab data but raises too many false alarms on everyday traffic from a different network; tuning is in progress.
 - **Plaintext payload inspection only.** Attacks inside TLS are invisible to the signature layer by design.
 - **No adversarial testing.** The attack scripts reproduce standard tool-driven attacks, not attacks designed to evade this detector.
-- **Planned work:** MITRE ATT&CK mapping, completing the automated retraining cycle, and mixing real benign traffic into the training data.
+- **Planned work:** completing the automated retraining cycle and mixing real benign traffic into the training data.
 
 ## See it running
 Source code is private to protect the work. I'm happy to walk through the code or give a live demonstration in an interview — contact **sulmn.cs@gmail.com** or [LinkedIn](https://linkedin.com/in/suliman-khan-2b9280251).
