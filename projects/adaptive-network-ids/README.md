@@ -1,7 +1,7 @@
 # Adaptive Network Intrusion Detection System
-> A full-stack network IDS that inspects live traffic with layered detectors (payload signatures, stateful attack heuristics and machine learning), explains each alert to an analyst, and was extended in 2026 with a self-built dataset and a live flow-based ML detector.
+> A full-stack network IDS that inspects live traffic with layered detectors (payload signatures, stateful attack heuristics and machine learning), explains each alert to an analyst, and includes a self-built dataset and a live flow-based ML detector.
 
-**Role:** Final-year project, B.S. Computer Science, FAST-NUCES, completed in 2025; extended independently in 2026 · **Status:** Working research prototype on a single host with live Wi-Fi capture, not a production deployment. A paper is in preparation. · **Source code:** private (code walkthrough or live demonstration available on request)
+**Role:** Final-year project, B.S. Computer Science, FAST-NUCES · **Status:** Working research prototype on a single host with live Wi-Fi capture, not a production deployment. A paper is in preparation. · **Source code:** private (code walkthrough or live demonstration available on request)
 
 ## The problem
 
@@ -13,7 +13,7 @@ Most intrusion detection systems rely on one method, and each kind fails in its 
 
 The goal was a system that combines several detection methods, keeps false alarms down on live traffic, and keeps the analyst in the loop.
 
-## What was built (2025)
+## What was built
 
 The thesis proposed a **six-layer adaptive architecture**. A Python/FastAPI backend captures packets with Scapy and runs each one through a chain of detectors. Alerts are stored in SQLite and streamed to a React dashboard over WebSocket.
 
@@ -25,7 +25,7 @@ The thesis proposed a **six-layer adaptive architecture**. A Python/FastAPI back
 - **Adaptive retraining.** Automated retraining from analyst labels, with model versioning and rollback, is implemented in code but has not yet completed a full cycle.
 - **Attack-simulation suite.** 29 attack generators with a launcher menu (floods, scans, brute force, SQL injection, XSS, backdoor probes), run from a phone on the same Wi-Fi so live tests are repeatable.
 
-## 2026 extension: from benchmark to real networks
+## From benchmark to real networks
 
 **1. Testing whether public datasets transfer.** I combined two public NetFlow datasets, NF-UNSW-NB15-v2 (1,986,745 rows) and NF-ToN-IoT-v2 (2,000,000 rows sampled from 13.1M), harmonised them to 37 shared features and removed 3,213,056 duplicate rows (81%), leaving 773,689 flows.
 - On a combined hold-out, XGBoost reached **97.8% accuracy** (F1 98.2%).
@@ -40,7 +40,7 @@ The thesis proposed a **six-layer adaptive architecture**. A Python/FastAPI back
 - **99.96% of attacks detected at 0.34% false alarms** (attack vs benign)
 - Weak spots: UDP and DNS floods are often confused with each other, and SSH brute force recall is 77%.
 
-**4. Fixing a train/serve mismatch in the live system.** The 2025 model was trained on whole flows but received single packets at runtime, so on live traffic it flagged almost everything. I disabled it in the live path and integrated a **flow-based detector**: nfstream extracts flows from the live interface exactly as in training, and the LabFlow-trained XGBoost model classifies each finished flow into 11 classes, running alongside the rule engine.
+**4. Fixing a train/serve mismatch in the live system.** The first model was trained on whole flows but received single packets at runtime, so on live traffic it flagged almost everything. I disabled it in the live path and integrated a **flow-based detector**: nfstream extracts flows from the live interface exactly as in training, and the LabFlow-trained XGBoost model classifies each finished flow into 11 classes, running alongside the rule engine.
 
 ## Architecture (current)
 
@@ -51,7 +51,7 @@ flowchart TD
     C -->|"no match"| D["Stateful heuristics: floods, scans, brute force, backdoor ports"]
     D -->|"no match"| E["Unknown-threat triage rules"]
     A --> F["Flow extraction - nfstream"]
-    F --> G["Flow-based XGBoost, 11 classes - 2026"]
+    F --> G["Flow-based XGBoost, 11 classes"]
     C -->|"alert"| DB[("SQLite alert store")]
     D -->|"alert"| DB
     E -->|"pending review"| DB
@@ -64,7 +64,7 @@ Packet-level checks run in order of cost and precision, and the first match wins
 
 ## Results
 
-**XGBoost on UNSW-NB15 (2025)**
+**XGBoost on UNSW-NB15**
 
 | What was measured | Result | How |
 |---|---|---|
@@ -75,7 +75,7 @@ Packet-level checks run in order of cost and precision, and the first match wins
 | ROC AUC | **0.9959** | Same split |
 | Model comparison | XGBoost 96.9% vs SVM 92.5% accuracy | Same split |
 
-**2026 extension**
+**Cross-dataset test and own dataset**
 
 | What was measured | Result |
 |---|---|
